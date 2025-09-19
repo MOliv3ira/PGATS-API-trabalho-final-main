@@ -1,0 +1,195 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "PGATS Automação API",
+    "version": "1.0.0",
+    "description": "API para autenticação de usuários e controle de tarefas (criação, leitura, atualização, exclusão e finalização)."
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  },
+  "paths": {
+    "/register": {
+      "post": {
+        "summary": "Registrar um novo usuário",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Usuário registrado" },
+          "400": { "description": "Erro ao registrar" }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "summary": "Efetuar login de usuário",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "username": { "type": "string" },
+                  "password": { "type": "string" }
+                },
+                "required": ["username", "password"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Login realizado com sucesso (JWT)" },
+          "400": { "description": "Erro ao efetuar login" },
+          "401": { "description": "Credenciais inválidas" }
+        }
+      }
+    },
+    "/tasks": {
+      "post": {
+        "summary": "Criar nova tarefa",
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "dueDate": { "type": "string", "format": "date" },
+                  "priority": { "type": "string", "enum": ["low", "medium", "high"] }
+                },
+                "required": ["title", "dueDate"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": { "description": "Tarefa criada" },
+          "400": { "description": "Erro de validação" },
+          "401": { "description": "Token inválido ou ausente" }
+        }
+      },
+      "get": {
+        "summary": "Listar todas as tarefas do usuário autenticado",
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": { "description": "Lista de tarefas" },
+          "401": { "description": "Token inválido ou ausente" }
+        }
+      }
+    },
+    "/tasks/{id}": {
+      "get": {
+        "summary": "Obter detalhes da tarefa por ID",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Tarefa encontrada" },
+          "404": { "description": "Tarefa não encontrada" },
+          "401": { "description": "Token inválido ou ausente" }
+        }
+      },
+      "put": {
+        "summary": "Atualizar tarefa por ID",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": { "type": "string" },
+                  "description": { "type": "string" },
+                  "dueDate": { "type": "string", "format": "date" },
+                  "priority": { "type": "string", "enum": ["low", "medium", "high"] },
+                  "status": { "type": "string", "enum": ["pending", "done"] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Tarefa atualizada" },
+          "400": { "description": "Erro de validação" },
+          "404": { "description": "Tarefa não encontrada" },
+          "401": { "description": "Token inválido ou ausente" }
+        }
+      },
+      "delete": {
+        "summary": "Excluir uma tarefa por ID",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Tarefa excluída com sucesso" },
+          "404": { "description": "Tarefa não encontrada" },
+          "401": { "description": "Token inválido ou ausente" }
+        }
+      }
+    },
+    "/tasks/{id}/complete": {
+      "post": {
+        "summary": "Marcar tarefa como concluída",
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "Tarefa concluída" },
+          "400": { "description": "Tarefa já foi concluída" },
+          "404": { "description": "Tarefa não encontrada" },
+          "401": { "description": "Token inválido ou ausente" }
+        }
+      }
+    }
+  }
+}
